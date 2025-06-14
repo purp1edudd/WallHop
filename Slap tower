@@ -5,45 +5,67 @@ local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
+-- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "IntroScreen"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.Parent = PlayerGui
 
-
--- Основной квадрат с заставкой
 local introFrame = Instance.new("Frame")
-introFrame.Size = UDim2.new(0, 500, 0, 500)
-introFrame.Position = UDim2.new(0.5, -250, 0.5, -250)
-introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-introFrame.BackgroundTransparency = 0.6
+introFrame.Size = UDim2.new(0, 400, 0, 200)
+introFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+introFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+introFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+introFrame.BackgroundTransparency = 1
 introFrame.Parent = screenGui
+Instance.new("UICorner", introFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UIStroke", introFrame).Color = Color3.fromRGB(100, 100, 100)
 
+-- Картинка сверху
+local image = Instance.new("ImageLabel")
+image.Size = UDim2.new(0, 80, 0, 80)
+image.Position = UDim2.new(0.5, 0, 0.1, 0)
+image.AnchorPoint = Vector2.new(0.5, 0)
+image.BackgroundTransparency = 1
+image.Image = "rbxassetid://109980441296620"
+image.ImageTransparency = 1
+image.Parent = introFrame
 
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 30)
-uiCorner.Parent = introFrame
-
-local introImage = Instance.new("ImageLabel")
-introImage.Size = UDim2.new(0, 300, 0, 300)
-introImage.Position = UDim2.new(0.5, -150, 0, 30)
-introImage.BackgroundTransparency = 1
-introImage.Image = "rbxassetid://71166604442794"
-introImage.Parent = introFrame
-
+-- Текст ниже
 local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(1, -40, 0, 100)
-introText.Position = UDim2.new(0, 20, 0, 350)
+introText.Size = UDim2.new(0.9, 0, 0.3, 0)
+introText.Position = UDim2.new(0.05, 0, 0.55, 0)
 introText.BackgroundTransparency = 1
-introText.Text = "Hello! The cheat is activated in a second..."
+introText.Text = "Hello! The cheat will activate in a moment..."
 introText.TextColor3 = Color3.new(1, 1, 1)
-introText.TextTransparency = 1
 introText.TextScaled = true
 introText.Font = Enum.Font.Gotham
-introText.TextWrapped = true
-introText.TextYAlignment = Enum.TextYAlignment.Center
+introText.TextTransparency = 1
 introText.Parent = introFrame
+
+-- Появление
+TweenService:Create(introFrame, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
+TweenService:Create(image, TweenInfo.new(0.6), {ImageTransparency = 0}):Play()
+TweenService:Create(introText, TweenInfo.new(0.6), {TextTransparency = 0}):Play()
+
+-- Задержка 5 секунд, затем уход вверх
+task.delay(5, function()
+	local tweenOut = TweenService:Create(introFrame, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, 0, -0.5, 0),
+		BackgroundTransparency = 1
+	})
+	TweenService:Create(image, TweenInfo.new(1), {ImageTransparency = 1}):Play()
+	TweenService:Create(introText, TweenInfo.new(1), {TextTransparency = 1}):Play()
+	tweenOut:Play()
+
+	tweenOut.Completed:Connect(function()
+		screenGui:Destroy()
+	end)
+end)
 
 -- GUI
 local screenGui = Instance.new("ScreenGui")
@@ -175,37 +197,3 @@ end)
 
 wait(0.5)
 openMenu()
-local function showIntro()
-    local tweenInfoIn = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {TextTransparency = 0})
-    local tweenImageIn = TweenService:Create(introImage, tweenInfoIn, {ImageTransparency = 0})
-    local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {BackgroundTransparency = 0.6})
-
-    introFrame.BackgroundTransparency = 1
-    introImage.ImageTransparency = 1
-    introText.TextTransparency = 1
-
-    tweenFrameIn:Play()
-    tweenImageIn:Play()
-    tweenTextIn:Play()
-
-    tweenTextIn.Completed:Connect(function()
-        wait(5)
-        local tweenInfoOut = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {TextTransparency = 1})
-        local tweenImageOut = TweenService:Create(introImage, tweenInfoOut, {ImageTransparency = 1})
-        local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {BackgroundTransparency = 1})
-
-        tweenTextOut:Play()
-        tweenImageOut:Play()
-        tweenFrameOut:Play()
-
-        tweenFrameOut.Completed:Connect(function()
-            introFrame:Destroy()
-            introImage:Destroy()
-            introText:Destroy()
-            print("Intro finished. Press M or use button to toggle cheat.")
-        end)
-    end)
-end
-showIntro()
