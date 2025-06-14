@@ -1,130 +1,141 @@
-local bit = bit32 or bit
-local bxor = bit.bxor
-
--- Функция XOR двух строк
-local function xorStrings(s1, s2)
+-- Функция XOR дешифровки строк (твой v7)
+local function xorStrings(str1, str2)
     local result = {}
-    local len2 = #s2
-    for i = 1, #s1 do
-        local c1 = string.byte(s1, i)
-        local c2 = string.byte(s2, 1 + (i % len2))
-        table.insert(result, string.char(bxor(c1, c2) % 256))
+    for i = 1, #str1 do
+        local c1 = string.byte(str1, i)
+        local c2 = string.byte(str2, 1 + (i % #str2))
+        result[i] = string.char(bit32.bxor(c1, c2) % 256)
     end
     return table.concat(result)
 end
 
--- Дешифровка названий служб и классов
-local tweenServiceName = xorStrings("\229\212\222\32\232\136\194\12\199\202\216\32", "\126\177\163\187\69\134\219\167")
-local playersServiceName = xorStrings("\0\194\36\209\249\45\217\26\215\243\53\196\46\192\238", "\156\67\173\74\165")
-local coreGuiName = xorStrings("\6\178\89\26\181\37\71\32\178\77\37\168\41\84\53\176\76", "\38\84\215\41\118\220\70")
-local screenGuiName = xorStrings("\99\21\48\23\251\94\49\55\27", "\158\48\118\66\114")
-local boolValueName = xorStrings("\137\43\31\58\69\164\247\190\33", "\155\203\68\112\86\19\197")
+-- Получаем сервисы (твой v8, v9, v11)
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
 
-local TweenService = game:GetService(tweenServiceName)
-local Players = game:GetService(playersServiceName)
-local CoreGui = game:GetService(coreGuiName)
-local LocalPlayer = Players.LocalPlayer
+local player = Players.LocalPlayer
 
-local boolValue = Instance.new(boolValueName)
-boolValue.Name = xorStrings("\106\210\55\248\115\123\247\241\86\201\25\238\110\119", "\152\38\189\86\156\32\24\133")
-boolValue.Parent = LocalPlayer
+-- Создаем ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MyCheatGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Проверка на существующие флаги и установка
-local isAllowed = true
-for _, child in pairs(LocalPlayer:GetChildren()) do
-    if child:IsA("BoolValue") then
-        if child.Value == true and child.Name == "AllowScript" then
-            isAllowed = false
-            boolValue:Destroy()
+-- Основной Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 150)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+mainFrame.BackgroundTransparency = 0.3
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner", mainFrame)
+uiCorner.CornerRadius = UDim.new(0, 12)
+
+-- Текст состояния чита
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 50)
+statusLabel.Position = UDim2.new(0, 10, 0, 10)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.TextSize = 24
+statusLabel.TextColor3 = Color3.new(1, 1, 1)
+statusLabel.Text = "Чит выключен"
+statusLabel.Parent = mainFrame
+
+-- Кнопка переключения чита
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 120, 0, 40)
+toggleButton.Position = UDim2.new(0.5, -60, 1, -50)
+toggleButton.AnchorPoint = Vector2.new(0.5, 1)
+toggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextSize = 20
+toggleButton.Text = "Включить чит"
+toggleButton.Parent = mainFrame
+
+-- Переменные состояния
+local cheatEnabled = false
+local canSpin = false -- твоя логика вращения при прыжке
+
+-- Функция включения/выключения чита
+local function toggleCheat()
+    cheatEnabled = not cheatEnabled
+    if cheatEnabled then
+        toggleButton.Text = "Выключить чит"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        statusLabel.Text = "Чит включен"
+        canSpin = true
+    else
+        toggleButton.Text = "Включить чит"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+        statusLabel.Text = "Чит выключен"
+        canSpin = false
+    end
+end
+
+toggleButton.MouseButton1Click:Connect(toggleCheat)
+
+-- Drag & Drop окна
+local dragging = false
+local dragStart
+local startPos
+
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        if dragging then
+            local delta = input.Position - dragStart
+            mainFrame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end
+end)
+
+-- Включение/выключение GUI клавишей M
+UserInputService.InputBegan:Connect(function(input, processed)
+    if not processed and input.KeyCode == Enum.KeyCode.M then
+        mainFrame.Visible = not mainFrame.Visible
+    end
+end)
+
+-- Обработка прыжка и вращения (твоя логика)
+local humanoid = nil
+
+local function onJumpRequest()
+    if cheatEnabled and canSpin then
+        local character = player.Character
+        if character then
+            humanoid = character:FindFirstChildOfClass("Humanoid")
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoid and rootPart then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                -- Поворот персонажа вокруг оси Y
+                for i = 1, 2 do
+                    rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(180), 0)
+                    wait(0.2)
+                end
+            end
         end
     end
 end
 
-if boolValue.Value == false and isAllowed == true then
-    boolValue.Value = true
-
-    local mainGui = Instance.new(screenGuiName)
-    mainGui.Name = "MainGui"
-    mainGui.Parent = CoreGui
-
-    -- Создание и настройка элементов GUI
-    local frame = Instance.new("ImageLabel", mainGui)
-    frame.Size = UDim2.new(0.23, 0, 0.4, 0)
-    frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    frame.AnchorPoint = Vector2.new(0.5, 0.5)
-    frame.BackgroundColor3 = Color3.new(1, 1, 1)
-    frame.BackgroundTransparency = 1
-    frame.Image = "rbxassetid://someImageId"
-    frame.BorderSizePixel = 0
-
-    local label = Instance.new("TextLabel", frame)
-    label.Size = UDim2.new(1, 0, 0.075, 0)
-    label.Position = UDim2.new(0, 0, 0.9, 0)
-    label.BackgroundTransparency = 1
-    label.Text = "Пример текста"
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.Font = Enum.Font.Gotham
-    label.TextScaled = true
-
-    -- Анимации Tween
-    TweenService:Create(frame, TweenInfo.new(1.5), {Position = UDim2.new(0.5, 0, 0.5, 0), ImageTransparency = 0}):Play()
-    TweenService:Create(label, TweenInfo.new(1.5), {TextTransparency = 0}):Play()
-
-    -- Таймаут на удаление GUI
-    task.wait(1.5)
-    mainGui:Destroy()
-
-    -- Создаем окно с кнопкой и перетаскиванием
-    local dragGui = Instance.new("ScreenGui")
-    dragGui.Parent = CoreGui
-
-    local window = Instance.new("Frame", dragGui)
-    window.Size = UDim2.new(0, 200, 0, 100)
-    window.Position = UDim2.new(0.5, -100, 0.5, -50)
-    window.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    window.BackgroundTransparency = 0.85
-
-    local button = Instance.new("TextButton", window)
-    button.Size = UDim2.new(0.8, 0, 0.3, 0)
-    button.Position = UDim2.new(0.1, 0, 0.6, 0)
-    button.Text = "Включить"
-    button.Font = Enum.Font.Gotham
-    button.TextScaled = true
-    button.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
-
-    local dragging, dragInput, dragStart, startPos
-
-    window.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = window.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    window.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-
-    local toggled = false
-    button.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        button.Text = toggled and "Выключить" or "Включить"
-        -- Добавляй здесь свою логику включения/выключения
-    end)
-end
+UserInputService.JumpRequest:Connect(onJumpRequest)
