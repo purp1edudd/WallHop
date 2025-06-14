@@ -1,141 +1,46 @@
--- Функция XOR дешифровки строк (твой v7)
-local function xorStrings(str1, str2)
-    local result = {}
-    for i = 1, #str1 do
-        local c1 = string.byte(str1, i)
-        local c2 = string.byte(str2, 1 + (i % #str2))
-        result[i] = string.char(bit32.bxor(c1, c2) % 256)
-    end
-    return table.concat(result)
-end
-
--- Получаем сервисы (твой v8, v9, v11)
-local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-
 local player = Players.LocalPlayer
 
--- Создаем ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MyCheatGui"
-screenGui.Parent = player:WaitForChild("PlayerGui")
+local cheatEnabled = false       -- Флаг, включён ли чит
+local canJumpSpin = true         -- Флаг, разрешающий поворот при прыжке
 
--- Основной Frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 150)
-mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-mainFrame.BackgroundTransparency = 0.3
-mainFrame.Parent = screenGui
-
-local uiCorner = Instance.new("UICorner", mainFrame)
-uiCorner.CornerRadius = UDim.new(0, 12)
-
--- Текст состояния чита
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -20, 0, 50)
-statusLabel.Position = UDim2.new(0, 10, 0, 10)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Font = Enum.Font.GothamBold
-statusLabel.TextSize = 24
-statusLabel.TextColor3 = Color3.new(1, 1, 1)
-statusLabel.Text = "Чит выключен"
-statusLabel.Parent = mainFrame
-
--- Кнопка переключения чита
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 120, 0, 40)
-toggleButton.Position = UDim2.new(0.5, -60, 1, -50)
-toggleButton.AnchorPoint = Vector2.new(0.5, 1)
-toggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-toggleButton.TextColor3 = Color3.new(1, 1, 1)
-toggleButton.Font = Enum.Font.GothamBold
-toggleButton.TextSize = 20
-toggleButton.Text = "Включить чит"
-toggleButton.Parent = mainFrame
-
--- Переменные состояния
-local cheatEnabled = false
-local canSpin = false -- твоя логика вращения при прыжке
-
--- Функция включения/выключения чита
+-- Функция переключения чита по клавише M
 local function toggleCheat()
     cheatEnabled = not cheatEnabled
-    if cheatEnabled then
-        toggleButton.Text = "Выключить чит"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        statusLabel.Text = "Чит включен"
-        canSpin = true
-    else
-        toggleButton.Text = "Включить чит"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-        statusLabel.Text = "Чит выключен"
-        canSpin = false
-    end
+    print("Cheat enabled:", cheatEnabled)
 end
 
-toggleButton.MouseButton1Click:Connect(toggleCheat)
-
--- Drag & Drop окна
-local dragging = false
-local dragStart
-local startPos
-
-mainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
+-- Переключаем чит при нажатии M
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.M then
+        toggleCheat()
     end
 end)
 
-mainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        if dragging then
-            local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset + delta.Y
-            )
-        end
-    end
-end)
-
--- Включение/выключение GUI клавишей M
-UserInputService.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.M then
-        mainFrame.Visible = not mainFrame.Visible
-    end
-end)
-
--- Обработка прыжка и вращения (твоя логика)
-local humanoid = nil
-
-local function onJumpRequest()
-    if cheatEnabled and canSpin then
+-- Обработка прыжка с задержкой и поворотом
+UserInputService.JumpRequest:Connect(function()
+    if cheatEnabled and canJumpSpin then
         local character = player.Character
-        if character then
-            humanoid = character:FindFirstChildOfClass("Humanoid")
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if humanoid and rootPart then
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                -- Поворот персонажа вокруг оси Y
-                for i = 1, 2 do
-                    rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(180), 0)
-                    wait(0.2)
-                end
-            end
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoid and rootPart then
+            canJumpSpin = false
+            
+            -- Запускаем прыжок
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            
+            -- Поворачиваем влево (около -57 градусов)
+            rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, -1, 0)
+            
+            wait(0.2)  -- Задержка после приземления
+            
+            -- Поворачиваем обратно вправо
+            rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, 1, 0)
+            
+            canJumpSpin = true
         end
     end
-end
-
-UserInputService.JumpRequest:Connect(onJumpRequest)
+end)
