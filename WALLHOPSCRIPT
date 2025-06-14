@@ -9,7 +9,7 @@ screenGui.Name = "IntroScreen"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local introFrame = Instance.new("Frame")
-introFrame.Size = UDim2.new(0.6, 0, 0.3, 0) -- например 60% ширины и 30% высоты экрана
+introFrame.Size = UDim2.new(0.6, 0, 0.6, 0) -- например 60% ширины и 30% высоты экрана
 introFrame.Position = UDim2.new(0.2, 0, 0.35, 0) -- по центру экрана примерно
 introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 introFrame.BackgroundTransparency = 0.5 -- полупрозрачный фон
