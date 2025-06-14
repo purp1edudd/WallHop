@@ -1,78 +1,54 @@
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
-local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
--- GUI
+-- ========== ЗАСТАВКА ==========
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "IntroScreen"
+screenGui.Name = "IntroAndMenu"
+screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
+-- Квадрат заставки
 local introFrame = Instance.new("Frame")
-introFrame.Size = UDim2.new(0, 400, 0, 200)
-introFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-introFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-introFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+introFrame.Size = UDim2.new(0, 500, 0, 500)
+introFrame.Position = UDim2.new(0.5, -250, 0.5, -250)
+introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 introFrame.BackgroundTransparency = 1
 introFrame.Parent = screenGui
-Instance.new("UICorner", introFrame).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", introFrame).Color = Color3.fromRGB(100, 100, 100)
+Instance.new("UICorner", introFrame).CornerRadius = UDim.new(0, 30)
 
--- Картинка сверху
-local image = Instance.new("ImageLabel")
-image.Size = UDim2.new(0, 80, 0, 80)
-image.Position = UDim2.new(0.5, 0, 0.1, 0)
-image.AnchorPoint = Vector2.new(0.5, 0)
-image.BackgroundTransparency = 1
-image.Image = "rbxassetid://109980441296620"
-image.ImageTransparency = 1
-image.Parent = introFrame
+-- Картинка
+local introImage = Instance.new("ImageLabel")
+introImage.Size = UDim2.new(0, 300, 0, 300)
+introImage.Position = UDim2.new(0.5, -150, 0, 30)
+introImage.BackgroundTransparency = 1
+introImage.Image = "rbxassetid://71166604442794"
+introImage.ImageTransparency = 1
+introImage.Parent = introFrame
 
--- Текст ниже
+-- Текст
 local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(0.9, 0, 0.3, 0)
-introText.Position = UDim2.new(0.05, 0, 0.55, 0)
+introText.Size = UDim2.new(1, -40, 0, 100)
+introText.Position = UDim2.new(0, 20, 0, 350)
 introText.BackgroundTransparency = 1
-introText.Text = "Hello! The cheat will activate in a moment..."
+introText.Text = "Hello! The cheat is activated in a second..."
 introText.TextColor3 = Color3.new(1, 1, 1)
+introText.TextTransparency = 1
 introText.TextScaled = true
 introText.Font = Enum.Font.Gotham
-introText.TextTransparency = 1
+introText.TextWrapped = true
+introText.TextYAlignment = Enum.TextYAlignment.Center
 introText.Parent = introFrame
 
--- Появление
-TweenService:Create(introFrame, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
-TweenService:Create(image, TweenInfo.new(0.6), {ImageTransparency = 0}):Play()
+-- Анимация появления
+TweenService:Create(introFrame, TweenInfo.new(0.6), {BackgroundTransparency = 0.3}):Play()
+TweenService:Create(introImage, TweenInfo.new(0.6), {ImageTransparency = 0}):Play()
 TweenService:Create(introText, TweenInfo.new(0.6), {TextTransparency = 0}):Play()
 
--- Задержка 5 секунд, затем уход вверх
-task.delay(5, function()
-	local tweenOut = TweenService:Create(introFrame, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = UDim2.new(0.5, 0, -0.5, 0),
-		BackgroundTransparency = 1
-	})
-	TweenService:Create(image, TweenInfo.new(1), {ImageTransparency = 1}):Play()
-	TweenService:Create(introText, TweenInfo.new(1), {TextTransparency = 1}):Play()
-	tweenOut:Play()
-
-	tweenOut.Completed:Connect(function()
-		screenGui:Destroy()
-	end)
-end)
-
--- GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "GloveMenu"
-screenGui.Parent = PlayerGui
-screenGui.ResetOnSpawn = false
-
+-- ========== МЕНЮ ==========
 local clickSound = Instance.new("Sound")
 clickSound.SoundId = "rbxassetid://452267918"
 clickSound.Volume = 1
@@ -83,9 +59,8 @@ mainFrame.Size = UDim2.new(0, 200, 0, 100)
 mainFrame.Position = UDim2.new(1, 20, 0.3, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.AnchorPoint = Vector2.new(1, 0.5)
-mainFrame.Visible = true
+mainFrame.Visible = false
 mainFrame.Parent = screenGui
-
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(80, 80, 80)
 
@@ -99,7 +74,7 @@ title.Font = Enum.Font.GothamSemibold
 title.TextScaled = true
 title.Parent = mainFrame
 
--- Get All Gloves button
+-- Кнопка
 local gloveButton = Instance.new("TextButton")
 gloveButton.Size = UDim2.new(0.9, 0, 0.4, 0)
 gloveButton.Position = UDim2.new(0.05, 0, 0.5, 0)
@@ -111,10 +86,10 @@ gloveButton.TextScaled = true
 gloveButton.Parent = mainFrame
 Instance.new("UICorner", gloveButton).CornerRadius = UDim.new(0, 8)
 
--- Toggle (collapse) button
+-- Кнопка сворачивания
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 30, 0, 30)
-toggleButton.Position = UDim2.new(0.962, -200,0.254, 0)
+toggleButton.Position = UDim2.new(0.962, -200, 0.254, 0)
 toggleButton.Text = ">"
 toggleButton.TextColor3 = Color3.new(1, 1, 1)
 toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -123,7 +98,7 @@ toggleButton.TextScaled = true
 toggleButton.Parent = screenGui
 Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 8)
 
--- Teleport + Return logic
+-- Логика телепорта
 local savedCFrame = nil
 gloveButton.MouseButton1Click:Connect(function()
 	clickSound:Play()
@@ -137,9 +112,7 @@ gloveButton.MouseButton1Click:Connect(function()
 	rootPart.CFrame = CFrame.new(-186.058868, 771.421936, 68.3176346)
 	wait(.5)
 	rootPart.CFrame = CFrame.new(-21.0327148, -8.57869434, 19.7716141)
-	
 
-	-- Автовозврат через 2 сек
 	task.delay(2, function()
 		if savedCFrame then
 			rootPart.CFrame = savedCFrame
@@ -147,8 +120,8 @@ gloveButton.MouseButton1Click:Connect(function()
 	end)
 end)
 
--- Menu animation logic
-local isOpen = true
+-- Анимации меню
+local isOpen = false
 
 local function openMenu()
 	mainFrame.Visible = true
@@ -160,7 +133,9 @@ local function openMenu()
 	for _, child in ipairs(mainFrame:GetChildren()) do
 		if child:IsA("TextLabel") or child:IsA("TextButton") then
 			child.TextTransparency = 0
-			child.BackgroundTransparency = (child:IsA("TextButton") and 0 or 1)
+			if child:IsA("TextButton") then
+				child.BackgroundTransparency = 0
+			end
 		end
 	end
 	toggleButton.Text = "<"
@@ -195,5 +170,17 @@ toggleButton.MouseButton1Click:Connect(function()
 	end
 end)
 
-wait(0.5)
-openMenu()
+-- ПОСЛЕ ЗАСТАВКИ: скрываем интро и открываем меню
+task.delay(5, function()
+	local tweenOut = TweenService:Create(introFrame, TweenInfo.new(1), {
+		Position = UDim2.new(0.5, -250, -0.5, -250),
+		BackgroundTransparency = 1
+	})
+	TweenService:Create(introImage, TweenInfo.new(1), {ImageTransparency = 1}):Play()
+	TweenService:Create(introText, TweenInfo.new(1), {TextTransparency = 1}):Play()
+	tweenOut:Play()
+	tweenOut.Completed:Connect(function()
+		introFrame:Destroy()
+	end)
+	openMenu()
+end)
