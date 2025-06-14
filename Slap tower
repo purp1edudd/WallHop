@@ -3,6 +3,47 @@ local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "IntroScreen"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+
+-- Основной квадрат с заставкой
+local introFrame = Instance.new("Frame")
+introFrame.Size = UDim2.new(0, 500, 0, 500)
+introFrame.Position = UDim2.new(0.5, -250, 0.5, -250)
+introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+introFrame.BackgroundTransparency = 0.6
+introFrame.Parent = screenGui
+
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 30)
+uiCorner.Parent = introFrame
+
+local introImage = Instance.new("ImageLabel")
+introImage.Size = UDim2.new(0, 300, 0, 300)
+introImage.Position = UDim2.new(0.5, -150, 0, 30)
+introImage.BackgroundTransparency = 1
+introImage.Image = "rbxassetid://71166604442794"
+introImage.Parent = introFrame
+
+local introText = Instance.new("TextLabel")
+introText.Size = UDim2.new(1, -40, 0, 100)
+introText.Position = UDim2.new(0, 20, 0, 350)
+introText.BackgroundTransparency = 1
+introText.Text = "Hello! The cheat is activated in a second..."
+introText.TextColor3 = Color3.new(1, 1, 1)
+introText.TextTransparency = 1
+introText.TextScaled = true
+introText.Font = Enum.Font.Gotham
+introText.TextWrapped = true
+introText.TextYAlignment = Enum.TextYAlignment.Center
+introText.Parent = introFrame
 
 -- GUI
 local screenGui = Instance.new("ScreenGui")
