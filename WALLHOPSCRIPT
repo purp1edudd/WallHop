@@ -5,7 +5,9 @@ local player = Players.LocalPlayer
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "IntroScreen"
+screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
+
 
 -- Основной квадрат с заставкой
 local introFrame = Instance.new("Frame")
@@ -14,6 +16,7 @@ introFrame.Position = UDim2.new(0.5, -250, 0.5, -250)
 introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 introFrame.BackgroundTransparency = 0.6
 introFrame.Parent = screenGui
+
 
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0, 30)
@@ -67,11 +70,11 @@ local canJumpSpin = true
 
 local function updateButton()
     if cheatEnabled then
-        cheatButton.Text = "ON(M)"
+        cheatButton.Text = "ON"
         cheatButton.TextColor3 = Color3.fromRGB(0, 255, 0)
         cheatButton.BackgroundColor3 = Color3.fromRGB(20, 100, 20)
     else
-        cheatButton.Text = "OFF(M)"
+        cheatButton.Text = "OFF"
         cheatButton.TextColor3 = Color3.fromRGB(255, 0, 0)
         cheatButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     end
