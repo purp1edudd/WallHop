@@ -9,28 +9,28 @@ screenGui.Name = "IntroScreen"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local introFrame = Instance.new("Frame")
-introFrame.Size = UDim2.new(0, 300, 0, 300) -- квадрат 300x300 пикселей
-introFrame.Position = UDim2.new(0.5, -150, 0.5, -150) -- по центру экрана (отнимаем половину размера)
+introFrame.Size = UDim2.new(0, 200, 0, 200) -- маленький квадрат 200x200 пикселей
+introFrame.Position = UDim2.new(0.5, -100, 0.5, -100) -- по центру (смещение на половину)
 introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-introFrame.BackgroundTransparency = 0.5
+introFrame.BackgroundTransparency = 0.6
 introFrame.Parent = screenGui
 
 local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 25) -- закруглённые углы
+uiCorner.CornerRadius = UDim.new(0, 20) -- закругленные углы
 uiCorner.Parent = introFrame
 
--- Картинка сверху
+-- Картинка сверху (маленькая)
 local introImage = Instance.new("ImageLabel")
-introImage.Size = UDim2.new(0, 150, 0, 150) -- квадрат 150x150 пикселей
-introImage.Position = UDim2.new(0.5, -75, 0, 20) -- по центру по X, отступ сверху 20px
+introImage.Size = UDim2.new(0, 100, 0, 100) -- квадрат 100x100
+introImage.Position = UDim2.new(0.5, -50, 0, 15) -- по центру, сверху с отступом 15px
 introImage.BackgroundTransparency = 1
 introImage.Image = "rbxassetid://109980441296620"
 introImage.Parent = introFrame
 
 -- Текст под картинкой
 local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(1, -40, 0, 80) -- по ширине с отступами слева и справа, высота 80px
-introText.Position = UDim2.new(0, 20, 0, 190) -- отступ сверху (150+20+20=190)
+introText.Size = UDim2.new(1, -20, 0, 50) -- ширина с отступами, высота 50
+introText.Position = UDim2.new(0, 10, 0, 125) -- чуть ниже картинки
 introText.BackgroundTransparency = 1
 introText.Text = "Hello! The cheat is activated in a second..."
 introText.TextColor3 = Color3.new(1, 1, 1)
@@ -75,43 +75,29 @@ end)
 
 -- Появление/исчезновение заставки
 local function showIntro()
-    local tweenInfoIn = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {
-        BackgroundTransparency = 0.5,
-        Position = introFrame.Position -- позиция не меняется
-    })
-    local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {
-        TextTransparency = 0
-    })
-    local tweenImageIn = TweenService:Create(introImage, tweenInfoIn, {
-        ImageTransparency = 0
-    })
+    local tweenInfoIn = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {TextTransparency = 0})
+    local tweenImageIn = TweenService:Create(introImage, tweenInfoIn, {ImageTransparency = 0})
+    local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {BackgroundTransparency = 0.6})
 
     introFrame.BackgroundTransparency = 1
     introImage.ImageTransparency = 1
     introText.TextTransparency = 1
 
     tweenFrameIn:Play()
-    tweenTextIn:Play()
     tweenImageIn:Play()
+    tweenTextIn:Play()
 
     tweenTextIn.Completed:Connect(function()
         wait(5)
-        local tweenInfoOut = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {
-            Position = introFrame.Position + UDim2.new(0, 0, -1, 0),
-            BackgroundTransparency = 1
-        })
-        local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {
-            TextTransparency = 1
-        })
-        local tweenImageOut = TweenService:Create(introImage, tweenInfoOut, {
-            ImageTransparency = 1
-        })
+        local tweenInfoOut = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {TextTransparency = 1})
+        local tweenImageOut = TweenService:Create(introImage, tweenInfoOut, {ImageTransparency = 1})
+        local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {BackgroundTransparency = 1})
 
-        tweenFrameOut:Play()
         tweenTextOut:Play()
         tweenImageOut:Play()
+        tweenFrameOut:Play()
 
         tweenFrameOut.Completed:Connect(function()
             screenGui:Destroy()
