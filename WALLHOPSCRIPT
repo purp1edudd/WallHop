@@ -13,7 +13,7 @@ introFrame.Size = UDim2.new(1, 0, 1, 0)
 introFrame.Position = UDim2.new(0, 0, 0, 0)
 introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 introFrame.BackgroundTransparency = 1 -- изначально прозрачный
-introFrame.Image = "rbxassetid://109980441296620" -- вставь сюда твой Asset ID
+introFrame.Image = "rbxassetid://71166604442794" -- вставь сюда твой Asset ID
 introFrame.ImageTransparency = 1 -- изначально картинка прозрачна
 introFrame.Parent = screenGui
 
