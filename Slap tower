@@ -175,3 +175,37 @@ end)
 
 wait(0.5)
 openMenu()
+local function showIntro()
+    local tweenInfoIn = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {TextTransparency = 0})
+    local tweenImageIn = TweenService:Create(introImage, tweenInfoIn, {ImageTransparency = 0})
+    local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {BackgroundTransparency = 0.6})
+
+    introFrame.BackgroundTransparency = 1
+    introImage.ImageTransparency = 1
+    introText.TextTransparency = 1
+
+    tweenFrameIn:Play()
+    tweenImageIn:Play()
+    tweenTextIn:Play()
+
+    tweenTextIn.Completed:Connect(function()
+        wait(5)
+        local tweenInfoOut = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {TextTransparency = 1})
+        local tweenImageOut = TweenService:Create(introImage, tweenInfoOut, {ImageTransparency = 1})
+        local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {BackgroundTransparency = 1})
+
+        tweenTextOut:Play()
+        tweenImageOut:Play()
+        tweenFrameOut:Play()
+
+        tweenFrameOut.Completed:Connect(function()
+            introFrame:Destroy()
+            introImage:Destroy()
+            introText:Destroy()
+            print("Intro finished. Press M or use button to toggle cheat.")
+        end)
+    end)
+end
+showIntro()
