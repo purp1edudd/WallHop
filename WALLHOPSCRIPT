@@ -11,75 +11,53 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 local introFrame = Instance.new("ImageLabel")
 introFrame.Size = UDim2.new(1, 0, 1, 0)
 introFrame.Position = UDim2.new(0, 0, 0, 0)
-introFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-introFrame.BackgroundTransparency = 0
-introFrame.Image = "rbxassetid://109980441296620" -- ID заставки
+introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+introFrame.BackgroundTransparency = 1 -- изначально прозрачный
+introFrame.Image = "rbxassetid://109980441296620" -- ID картинки
 
--- Скругление углов заставки
-local introUICorner = Instance.new("UICorner")
-introUICorner.CornerRadius = UDim.new(0, 16)
-introUICorner.Parent = introFrame
-
--- Контур заставки
-local introUIStroke = Instance.new("UIStroke")
-introUIStroke.Thickness = 4
-introUIStroke.Color = Color3.fromRGB(255, 255, 255)
-introUIStroke.Parent = introFrame
+local uicorner = Instance.new("UICorner")
+uicorner.CornerRadius = UDim.new(0, 20)
+uicorner.Parent = introFrame
 
 local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(0.6, 0, 0.2, 0)
-introText.Position = UDim2.new(0.2, 0, 0.4, 0)
-introText.BackgroundTransparency = 0.1  -- чуть непрозрачный фон для контраста
-introText.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+introText.Size = UDim2.new(1, 0, 0.2, 0)
+introText.Position = UDim2.new(0, 0, 0.4, 0)
+introText.BackgroundTransparency = 1
 introText.Text = "Hello! The cheat is activated in a second..."
-introText.TextColor3 = Color3.fromRGB(255, 255, 255)
+introText.TextColor3 = Color3.new(1, 1, 1)
 introText.TextScaled = true
 introText.Font = Enum.Font.Gotham
+introText.TextTransparency = 1 -- изначально невидимый
 introText.Parent = introFrame
-introText.TextStrokeTransparency = 0.7
-introText.TextWrapped = true
-introText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-
--- Скруглим углы текста
-local textUICorner = Instance.new("UICorner")
-textUICorner.CornerRadius = UDim.new(0, 8)
-textUICorner.Parent = introText
-
--- Контур для текста
-local textUIStroke = Instance.new("UIStroke")
-textUIStroke.Thickness = 2
-textUIStroke.Color = Color3.fromRGB(0, 0, 0)
-textUIStroke.Parent = introText
 
 introFrame.Parent = screenGui
 
--- Начальные прозрачности для плавного появления
+-- Начальные прозрачности
 introFrame.ImageTransparency = 1
 introFrame.BackgroundTransparency = 1
 introText.TextTransparency = 1
 introText.BackgroundTransparency = 1
 
--- Длительность твина — 5 секунд (плавное появление)
+-- Твин появления (3 секунды)
 local tweenInfoIn = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-
--- Появление заставки и текста
 local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {
     ImageTransparency = 0,
     BackgroundTransparency = 0.2
 })
 local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {
     TextTransparency = 0,
-    BackgroundTransparency = 0.1
+    BackgroundTransparency = 1
 })
 
 tweenFrameIn:Play()
 tweenTextIn:Play()
 
 tweenTextIn.Completed:Connect(function()
-    wait(2) -- оставляем заставку на экране 2 секунды
+    -- Ждём 5 секунд после появления
+    wait(5)
 
-    -- Твин исчезновения (5 секунд)
-    local tweenInfoOut = TweenInfo.new(5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    -- Твин исчезновения (3 секунды)
+    local tweenInfoOut = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {
         Position = UDim2.new(0, 0, -1, 0),
         ImageTransparency = 1,
