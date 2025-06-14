@@ -12,10 +12,10 @@ local introFrame = Instance.new("ImageLabel")
 introFrame.Size = UDim2.new(1, 0, 1, 0)
 introFrame.Position = UDim2.new(0, 0, 0, 0)
 introFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-introFrame.BackgroundTransparency = 0.2
-introFrame.Image = "rbxassetid://109980441296620" -- ID заставки, используй "rbxassetid://" + ID
+introFrame.BackgroundTransparency = 0
+introFrame.Image = "rbxassetid://109980441296620" -- ID заставки
 
--- Добавим скругление углов заставки
+-- Скругление углов заставки
 local introUICorner = Instance.new("UICorner")
 introUICorner.CornerRadius = UDim.new(0, 16)
 introUICorner.Parent = introFrame
@@ -29,7 +29,7 @@ introUIStroke.Parent = introFrame
 local introText = Instance.new("TextLabel")
 introText.Size = UDim2.new(0.6, 0, 0.2, 0)
 introText.Position = UDim2.new(0.2, 0, 0.4, 0)
-introText.BackgroundTransparency = 0.5
+introText.BackgroundTransparency = 0.1  -- чуть непрозрачный фон для контраста
 introText.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 introText.Text = "Hello! The cheat is activated in a second..."
 introText.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -40,7 +40,7 @@ introText.TextStrokeTransparency = 0.7
 introText.TextWrapped = true
 introText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 
--- Скруглим углы тексту
+-- Скруглим углы текста
 local textUICorner = Instance.new("UICorner")
 textUICorner.CornerRadius = UDim.new(0, 8)
 textUICorner.Parent = introText
@@ -53,17 +53,51 @@ textUIStroke.Parent = introText
 
 introFrame.Parent = screenGui
 
--- Твин для плавного исчезновения заставки (сдвиг вверх и прозрачность)
-local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local tweenProps = {
-    Position = UDim2.new(0, 0, -1, 0),
-    BackgroundTransparency = 1,
-    ImageTransparency = 1,
-    -- Для текста отдельно делаем прозрачность
-}
-local tween = TweenService:Create(introFrame, tweenInfo, tweenProps)
+-- Начальные прозрачности для плавного появления
+introFrame.ImageTransparency = 1
+introFrame.BackgroundTransparency = 1
+introText.TextTransparency = 1
+introText.BackgroundTransparency = 1
 
-local textFadeTween = TweenService:Create(introText, tweenInfo, {TextTransparency = 1})
+-- Длительность твина — 5 секунд (плавное появление)
+local tweenInfoIn = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+-- Появление заставки и текста
+local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {
+    ImageTransparency = 0,
+    BackgroundTransparency = 0.2
+})
+local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {
+    TextTransparency = 0,
+    BackgroundTransparency = 0.1
+})
+
+tweenFrameIn:Play()
+tweenTextIn:Play()
+
+tweenTextIn.Completed:Connect(function()
+    wait(2) -- оставляем заставку на экране 2 секунды
+
+    -- Твин исчезновения (5 секунд)
+    local tweenInfoOut = TweenInfo.new(5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {
+        Position = UDim2.new(0, 0, -1, 0),
+        ImageTransparency = 1,
+        BackgroundTransparency = 1
+    })
+    local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {
+        TextTransparency = 1,
+        BackgroundTransparency = 1
+    })
+
+    tweenFrameOut:Play()
+    tweenTextOut:Play()
+
+    tweenFrameOut.Completed:Connect(function()
+        screenGui:Destroy()
+        print("Intro finished. Press M to toggle cheat.")
+    end)
+end)
 
 -- Переменные чита
 local cheatEnabled = false
@@ -98,12 +132,4 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.M then
         toggleCheat()
     end
-end)
-
--- Запускаем твин заставки и текстового лейбла, после чего удаляем их
-tween:Play()
-textFadeTween:Play()
-tween.Completed:Connect(function()
-    screenGui:Destroy()
-    print("Intro finished. Press M to toggle cheat.")
 end)
