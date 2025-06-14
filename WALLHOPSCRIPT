@@ -8,28 +8,36 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "IntroScreen"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
-local introFrame = Instance.new("ImageLabel")
-introFrame.Size = UDim2.new(1, 0, 1, 0)
-introFrame.Position = UDim2.new(0, 0, 0, 0)
+local introFrame = Instance.new("Frame")
+introFrame.Size = UDim2.new(0.6, 0, 0.3, 0) -- например 60% ширины и 30% высоты экрана
+introFrame.Position = UDim2.new(0.2, 0, 0.35, 0) -- по центру экрана примерно
 introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-introFrame.BackgroundTransparency = 1 -- изначально прозрачный
-introFrame.Image = "rbxassetid://71166604442794" -- вставь сюда твой Asset ID
-introFrame.ImageTransparency = 1 -- изначально картинка прозрачна
+introFrame.BackgroundTransparency = 0.5 -- полупрозрачный фон
 introFrame.Parent = screenGui
 
 local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 20) -- радиус скругления 20 пикселей
+uiCorner.CornerRadius = UDim.new(0, 20)
 uiCorner.Parent = introFrame
 
+-- Картинка сверху
+local introImage = Instance.new("ImageLabel")
+introImage.Size = UDim2.new(0.3, 0, 0.6, 0) -- ширина 30% от фрейма, высота 60%
+introImage.Position = UDim2.new(0.35, 0, 0.05, 0) -- отступ сверху и по центру
+introImage.BackgroundTransparency = 1
+introImage.Image = "rbxassetid://71166604442794" -- твой Asset ID
+introImage.Parent = introFrame
+
+-- Текст под картинкой
 local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(1, 0, 0.2, 0)
-introText.Position = UDim2.new(0, 0, 0.4, 0)
+introText.Size = UDim2.new(1, -20, 0.3, 0) -- ширина фрейма минус отступы, высота 30%
+introText.Position = UDim2.new(0, 10, 0.7, 0) -- чуть ниже картинки
 introText.BackgroundTransparency = 1
 introText.Text = "Hello! The cheat is activated in a second..."
 introText.TextColor3 = Color3.new(1, 1, 1)
-introText.TextTransparency = 1 -- изначально текст невидим
+introText.TextTransparency = 1 -- изначально невидим
 introText.TextScaled = true
 introText.Font = Enum.Font.Gotham
+introText.TextWrapped = true
 introText.Parent = introFrame
 
 local cheatEnabled = false
@@ -64,34 +72,47 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Функция показа заставки с твинами и задержкой
+-- Появление/исчезновение заставки
+
 local function showIntro()
     local tweenInfoIn = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {
-        BackgroundTransparency = 0.2,
-        ImageTransparency = 0
+        BackgroundTransparency = 0,
+        Position = introFrame.Position -- позиция не меняется
     })
     local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {
         TextTransparency = 0
     })
+    local tweenImageIn = TweenService:Create(introImage, tweenInfoIn, {
+        ImageTransparency = 0
+    })
+
+    -- Изначально сделать изображение и фон прозрачными
+    introFrame.BackgroundTransparency = 1
+    introImage.ImageTransparency = 1
+    introText.TextTransparency = 1
 
     tweenFrameIn:Play()
     tweenTextIn:Play()
+    tweenImageIn:Play()
 
     tweenTextIn.Completed:Connect(function()
         delay(5, function()
             local tweenInfoOut = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {
-                Position = UDim2.new(0, 0, -1, 0),
-                BackgroundTransparency = 1,
-                ImageTransparency = 1
+                Position = introFrame.Position + UDim2.new(0, 0, -1, 0),
+                BackgroundTransparency = 1
             })
             local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {
                 TextTransparency = 1
             })
+            local tweenImageOut = TweenService:Create(introImage, tweenInfoOut, {
+                ImageTransparency = 1
+            })
 
             tweenFrameOut:Play()
             tweenTextOut:Play()
+            tweenImageOut:Play()
 
             tweenFrameOut.Completed:Connect(function()
                 screenGui:Destroy()
