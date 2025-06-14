@@ -11,19 +11,45 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 local introFrame = Instance.new("ImageLabel")
 introFrame.Size = UDim2.new(1, 0, 1, 0)
 introFrame.Position = UDim2.new(0, 0, 0, 0)
-introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-introFrame.BackgroundTransparency = 0
-introFrame.Image = "" -- Можно вставить сюда URL изображения, если хочешь картинку
+introFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+introFrame.BackgroundTransparency = 0.2
+introFrame.Image = "rbxassetid://109980441296620" -- ID заставки, используй "rbxassetid://" + ID
+
+-- Добавим скругление углов заставки
+local introUICorner = Instance.new("UICorner")
+introUICorner.CornerRadius = UDim.new(0, 16)
+introUICorner.Parent = introFrame
+
+-- Контур заставки
+local introUIStroke = Instance.new("UIStroke")
+introUIStroke.Thickness = 4
+introUIStroke.Color = Color3.fromRGB(255, 255, 255)
+introUIStroke.Parent = introFrame
 
 local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(1, 0, 0.2, 0)
-introText.Position = UDim2.new(0, 0, 0.4, 0)
-introText.BackgroundTransparency = 1
-introText.Text = "Hello!  The cheat is activated in a second..."
-introText.TextColor3 = Color3.new(1, 1, 1)
+introText.Size = UDim2.new(0.6, 0, 0.2, 0)
+introText.Position = UDim2.new(0.2, 0, 0.4, 0)
+introText.BackgroundTransparency = 0.5
+introText.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+introText.Text = "Hello! The cheat is activated in a second..."
+introText.TextColor3 = Color3.fromRGB(255, 255, 255)
 introText.TextScaled = true
 introText.Font = Enum.Font.Gotham
 introText.Parent = introFrame
+introText.TextStrokeTransparency = 0.7
+introText.TextWrapped = true
+introText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+-- Скруглим углы тексту
+local textUICorner = Instance.new("UICorner")
+textUICorner.CornerRadius = UDim.new(0, 8)
+textUICorner.Parent = introText
+
+-- Контур для текста
+local textUIStroke = Instance.new("UIStroke")
+textUIStroke.Thickness = 2
+textUIStroke.Color = Color3.fromRGB(0, 0, 0)
+textUIStroke.Parent = introText
 
 introFrame.Parent = screenGui
 
@@ -32,10 +58,12 @@ local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.O
 local tweenProps = {
     Position = UDim2.new(0, 0, -1, 0),
     BackgroundTransparency = 1,
-    TextTransparency = 1,
-    ImageTransparency = 1
+    ImageTransparency = 1,
+    -- Для текста отдельно делаем прозрачность
 }
 local tween = TweenService:Create(introFrame, tweenInfo, tweenProps)
+
+local textFadeTween = TweenService:Create(introText, tweenInfo, {TextTransparency = 1})
 
 -- Переменные чита
 local cheatEnabled = false
@@ -72,8 +100,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Запускаем твин заставки, после чего удаляем её
+-- Запускаем твин заставки и текстового лейбла, после чего удаляем их
 tween:Play()
+textFadeTween:Play()
 tween.Completed:Connect(function()
     screenGui:Destroy()
     print("Intro finished. Press M to toggle cheat.")
