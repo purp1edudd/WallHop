@@ -3,51 +3,98 @@ local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- Создаём заставку
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "IntroScreen"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
+-- Основной квадрат с заставкой
 local introFrame = Instance.new("Frame")
-introFrame.Size = UDim2.new(0, 200, 0, 200) -- маленький квадрат 200x200 пикселей
-introFrame.Position = UDim2.new(0.5, -100, 0.5, -100) -- по центру (смещение на половину)
+introFrame.Size = UDim2.new(0, 500, 0, 500)
+introFrame.Position = UDim2.new(0.5, -250, 0.5, -250)
 introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 introFrame.BackgroundTransparency = 0.6
 introFrame.Parent = screenGui
 
 local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 20) -- закругленные углы
+uiCorner.CornerRadius = UDim.new(0, 30)
 uiCorner.Parent = introFrame
 
--- Картинка сверху (маленькая)
 local introImage = Instance.new("ImageLabel")
-introImage.Size = UDim2.new(0, 100, 0, 100) -- квадрат 100x100
-introImage.Position = UDim2.new(0.5, -50, 0, 15) -- по центру, сверху с отступом 15px
+introImage.Size = UDim2.new(0, 300, 0, 300)
+introImage.Position = UDim2.new(0.5, -150, 0, 30)
 introImage.BackgroundTransparency = 1
-introImage.Image = "rbxassetid://109980441296620"
+introImage.Image = "rbxassetid://71166604442794"
 introImage.Parent = introFrame
 
--- Текст под картинкой
 local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(1, -20, 0, 50) -- ширина с отступами, высота 50
-introText.Position = UDim2.new(0, 10, 0, 125) -- чуть ниже картинки
+introText.Size = UDim2.new(1, -40, 0, 100)
+introText.Position = UDim2.new(0, 20, 0, 350)
 introText.BackgroundTransparency = 1
 introText.Text = "Hello! The cheat is activated in a second..."
 introText.TextColor3 = Color3.new(1, 1, 1)
-introText.TextTransparency = 1 -- изначально скрыт
+introText.TextTransparency = 1
 introText.TextScaled = true
 introText.Font = Enum.Font.Gotham
 introText.TextWrapped = true
 introText.TextYAlignment = Enum.TextYAlignment.Center
 introText.Parent = introFrame
 
+-- Кнопка для мобилок
+local cheatButton = Instance.new("TextButton")
+cheatButton.Size = UDim2.new(0, 100, 0, 100)
+cheatButton.Position = UDim2.new(0.9, -110, 0.9, -110) -- внизу справа с небольшим отступом
+cheatButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+cheatButton.AutoButtonColor = false
+cheatButton.Text = "OFF"
+cheatButton.TextColor3 = Color3.new(1, 0, 0)
+cheatButton.Font = Enum.Font.GothamBold
+cheatButton.TextScaled = true
+cheatButton.Parent = screenGui
+
+local cheatButtonUICorner = Instance.new("UICorner")
+cheatButtonUICorner.CornerRadius = UDim.new(1, 0) -- полностью круглая кнопка
+cheatButtonUICorner.Parent = cheatButton
+
+-- Звук клика
+local clickSound = Instance.new("Sound")
+clickSound.SoundId = "rbxassetid://4499400560" -- щелчок, можно заменить
+clickSound.Volume = 0.5
+clickSound.Parent = cheatButton
+
+-- Статус чита
 local cheatEnabled = false
 local canJumpSpin = true
 
+local function updateButton()
+    if cheatEnabled then
+        cheatButton.Text = "ON"
+        cheatButton.TextColor3 = Color3.fromRGB(0, 255, 0)
+        cheatButton.BackgroundColor3 = Color3.fromRGB(20, 100, 20)
+    else
+        cheatButton.Text = "OFF"
+        cheatButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+        cheatButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end
+end
+
+local function playButtonAnimation()
+    local tweenOut = TweenService:Create(cheatButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 80, 0, 80)})
+    local tweenIn = TweenService:Create(cheatButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 100, 0, 100)})
+
+    tweenOut:Play()
+    tweenOut.Completed:Wait()
+    tweenIn:Play()
+end
+
 local function toggleCheat()
     cheatEnabled = not cheatEnabled
+    updateButton()
+    clickSound:Play()
+    playButtonAnimation()
     print("Cheat enabled:", cheatEnabled)
 end
+
+cheatButton.MouseButton1Click:Connect(toggleCheat)
 
 UserInputService.JumpRequest:Connect(function()
     if cheatEnabled and canJumpSpin then
@@ -73,7 +120,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Появление/исчезновение заставки
 local function showIntro()
     local tweenInfoIn = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {TextTransparency = 0})
@@ -100,10 +146,13 @@ local function showIntro()
         tweenFrameOut:Play()
 
         tweenFrameOut.Completed:Connect(function()
-            screenGui:Destroy()
-            print("Intro finished. Press M to toggle cheat.")
+            introFrame:Destroy()
+            introImage:Destroy()
+            introText:Destroy()
+            print("Intro finished. Press M or use button to toggle cheat.")
         end)
     end)
 end
 
+updateButton()
 showIntro()
