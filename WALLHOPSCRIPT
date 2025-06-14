@@ -13,11 +13,13 @@ introFrame.Size = UDim2.new(1, 0, 1, 0)
 introFrame.Position = UDim2.new(0, 0, 0, 0)
 introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
 introFrame.BackgroundTransparency = 1 -- изначально прозрачный
-introFrame.Image = "rbxassetid://109980441296620" -- ID картинки
+introFrame.Image = "rbxassetid://109980441296620" -- вставь сюда твой Asset ID
+introFrame.ImageTransparency = 1 -- изначально картинка прозрачна
+introFrame.Parent = screenGui
 
-local uicorner = Instance.new("UICorner")
-uicorner.CornerRadius = UDim.new(0, 20)
-uicorner.Parent = introFrame
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 20) -- радиус скругления 20 пикселей
+uiCorner.Parent = introFrame
 
 local introText = Instance.new("TextLabel")
 introText.Size = UDim2.new(1, 0, 0.2, 0)
@@ -25,59 +27,11 @@ introText.Position = UDim2.new(0, 0, 0.4, 0)
 introText.BackgroundTransparency = 1
 introText.Text = "Hello! The cheat is activated in a second..."
 introText.TextColor3 = Color3.new(1, 1, 1)
+introText.TextTransparency = 1 -- изначально текст невидим
 introText.TextScaled = true
 introText.Font = Enum.Font.Gotham
-introText.TextTransparency = 1 -- изначально невидимый
 introText.Parent = introFrame
 
-introFrame.Parent = screenGui
-
--- Начальные прозрачности
-introFrame.ImageTransparency = 1
-introFrame.BackgroundTransparency = 1
-introText.TextTransparency = 1
-introText.BackgroundTransparency = 1
-
--- Твин появления (3 секунды)
-local tweenInfoIn = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {
-    ImageTransparency = 0,
-    BackgroundTransparency = 0.2
-})
-local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {
-    TextTransparency = 0,
-    BackgroundTransparency = 1
-})
-
-tweenFrameIn:Play()
-tweenTextIn:Play()
-
-tweenTextIn.Completed:Connect(function()
-    -- Ждём 5 секунд после появления
-    wait(5)
-
-    -- Твин исчезновения (3 секунды)
-    local tweenInfoOut = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {
-        Position = UDim2.new(0, 0, -1, 0),
-        ImageTransparency = 1,
-        BackgroundTransparency = 1
-    })
-    local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {
-        TextTransparency = 1,
-        BackgroundTransparency = 1
-    })
-
-    tweenFrameOut:Play()
-    tweenTextOut:Play()
-
-    tweenFrameOut.Completed:Connect(function()
-        screenGui:Destroy()
-        print("Intro finished. Press M to toggle cheat.")
-    end)
-end)
-
--- Переменные чита
 local cheatEnabled = false
 local canJumpSpin = true
 
@@ -86,7 +40,6 @@ local function toggleCheat()
     print("Cheat enabled:", cheatEnabled)
 end
 
--- Обработка прыжка
 UserInputService.JumpRequest:Connect(function()
     if cheatEnabled and canJumpSpin then
         local character = player.Character
@@ -105,9 +58,47 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
--- Обработка переключения чита по клавише M
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.M then
         toggleCheat()
     end
 end)
+
+-- Функция показа заставки с твинами и задержкой
+local function showIntro()
+    local tweenInfoIn = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {
+        BackgroundTransparency = 0.2,
+        ImageTransparency = 0
+    })
+    local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {
+        TextTransparency = 0
+    })
+
+    tweenFrameIn:Play()
+    tweenTextIn:Play()
+
+    tweenTextIn.Completed:Connect(function()
+        delay(5, function()
+            local tweenInfoOut = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {
+                Position = UDim2.new(0, 0, -1, 0),
+                BackgroundTransparency = 1,
+                ImageTransparency = 1
+            })
+            local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {
+                TextTransparency = 1
+            })
+
+            tweenFrameOut:Play()
+            tweenTextOut:Play()
+
+            tweenFrameOut.Completed:Connect(function()
+                screenGui:Destroy()
+                print("Intro finished. Press M to toggle cheat.")
+            end)
+        end)
+    end)
+end
+
+showIntro()
