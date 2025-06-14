@@ -67,11 +67,11 @@ local canJumpSpin = true
 
 local function updateButton()
     if cheatEnabled then
-        cheatButton.Text = "ON"
+        cheatButton.Text = "ON(M)"
         cheatButton.TextColor3 = Color3.fromRGB(0, 255, 0)
         cheatButton.BackgroundColor3 = Color3.fromRGB(20, 100, 20)
     else
-        cheatButton.Text = "OFF"
+        cheatButton.Text = "OFF(M)"
         cheatButton.TextColor3 = Color3.fromRGB(255, 0, 0)
         cheatButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     end
