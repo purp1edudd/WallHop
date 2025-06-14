@@ -1,161 +1,136 @@
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
 local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
+-- GUI
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "IntroScreen"
+screenGui.Name = "GloveMenu"
+screenGui.Parent = PlayerGui
 screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
 
-
--- Основной квадрат с заставкой
-local introFrame = Instance.new("Frame")
-introFrame.Size = UDim2.new(0, 500, 0, 500)
-introFrame.Position = UDim2.new(0.5, -250, 0.5, -250)
-introFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-introFrame.BackgroundTransparency = 0.6
-introFrame.Parent = screenGui
-
-
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 30)
-uiCorner.Parent = introFrame
-
-local introImage = Instance.new("ImageLabel")
-introImage.Size = UDim2.new(0, 300, 0, 300)
-introImage.Position = UDim2.new(0.5, -150, 0, 30)
-introImage.BackgroundTransparency = 1
-introImage.Image = "rbxassetid://71166604442794"
-introImage.Parent = introFrame
-
-local introText = Instance.new("TextLabel")
-introText.Size = UDim2.new(1, -40, 0, 100)
-introText.Position = UDim2.new(0, 20, 0, 350)
-introText.BackgroundTransparency = 1
-introText.Text = "Hello! The cheat is activated in a second..."
-introText.TextColor3 = Color3.new(1, 1, 1)
-introText.TextTransparency = 1
-introText.TextScaled = true
-introText.Font = Enum.Font.Gotham
-introText.TextWrapped = true
-introText.TextYAlignment = Enum.TextYAlignment.Center
-introText.Parent = introFrame
-
--- Кнопка для мобилок
-local cheatButton = Instance.new("TextButton")
-cheatButton.Size = UDim2.new(0, 100, 0, 100)
-cheatButton.Position = UDim2.new(0.9, -110, 0.9, -110) -- внизу справа с небольшим отступом
-cheatButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-cheatButton.AutoButtonColor = false
-cheatButton.Text = "OFF"
-cheatButton.TextColor3 = Color3.new(1, 0, 0)
-cheatButton.Font = Enum.Font.GothamBold
-cheatButton.TextScaled = true
-cheatButton.Parent = screenGui
-
-local cheatButtonUICorner = Instance.new("UICorner")
-cheatButtonUICorner.CornerRadius = UDim.new(1, 0) -- полностью круглая кнопка
-cheatButtonUICorner.Parent = cheatButton
-
--- Звук клика
 local clickSound = Instance.new("Sound")
-clickSound.SoundId = "rbxassetid://4499400560" -- щелчок, можно заменить
-clickSound.Volume = 0.5
-clickSound.Parent = cheatButton
+clickSound.SoundId = "rbxassetid://452267918"
+clickSound.Volume = 1
+clickSound.Parent = SoundService
 
--- Статус чита
-local cheatEnabled = false
-local canJumpSpin = true
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 200, 0, 100)
+mainFrame.Position = UDim2.new(1, 20, 0.3, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.AnchorPoint = Vector2.new(1, 0.5)
+mainFrame.Visible = true
+mainFrame.Parent = screenGui
 
-local function updateButton()
-    if cheatEnabled then
-        cheatButton.Text = "ON"
-        cheatButton.TextColor3 = Color3.fromRGB(0, 255, 0)
-        cheatButton.BackgroundColor3 = Color3.fromRGB(20, 100, 20)
-    else
-        cheatButton.Text = "OFF"
-        cheatButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-        cheatButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    end
-end
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+Instance.new("UIStroke", mainFrame).Color = Color3.fromRGB(80, 80, 80)
 
-local function playButtonAnimation()
-    local tweenOut = TweenService:Create(cheatButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 80, 0, 80)})
-    local tweenIn = TweenService:Create(cheatButton, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 100, 0, 100)})
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0.3, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Text = "Slap Tower Menu"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamSemibold
+title.TextScaled = true
+title.Parent = mainFrame
 
-    tweenOut:Play()
-    tweenOut.Completed:Wait()
-    tweenIn:Play()
-end
+-- Get All Gloves button
+local gloveButton = Instance.new("TextButton")
+gloveButton.Size = UDim2.new(0.9, 0, 0.4, 0)
+gloveButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+gloveButton.Text = "Get all Gloves"
+gloveButton.TextColor3 = Color3.new(1, 1, 1)
+gloveButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+gloveButton.Font = Enum.Font.Gotham
+gloveButton.TextScaled = true
+gloveButton.Parent = mainFrame
+Instance.new("UICorner", gloveButton).CornerRadius = UDim.new(0, 8)
 
-local function toggleCheat()
-    cheatEnabled = not cheatEnabled
-    updateButton()
-    clickSound:Play()
-    playButtonAnimation()
-    print("Cheat enabled:", cheatEnabled)
-end
+-- Toggle (collapse) button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(0.962, -200,0.254, 0)
+toggleButton.Text = ">"
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextScaled = true
+toggleButton.Parent = screenGui
+Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 8)
 
-cheatButton.MouseButton1Click:Connect(toggleCheat)
+-- Teleport + Return logic
+local savedCFrame = nil
+gloveButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
+	local character = player.Character or player.CharacterAdded:Wait()
+	local rootPart = character:WaitForChild("HumanoidRootPart")
+	savedCFrame = rootPart.CFrame
+	rootPart.CFrame = CFrame.new(185.226074, -8.57869244, 90.5352173)
+	wait(.5)
+	rootPart.CFrame = CFrame.new(-22.391264, -6.96977425, 107.38147)
+	wait(.5)
+	rootPart.CFrame = CFrame.new(-186.058868, 771.421936, 68.3176346)
+	wait(.5)
+	rootPart.CFrame = CFrame.new(-21.0327148, -8.57869434, 19.7716141)
+	
 
-UserInputService.JumpRequest:Connect(function()
-    if cheatEnabled and canJumpSpin then
-        local character = player.Character
-        if not character then return end
-        
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        local rootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoid and rootPart then
-            canJumpSpin = false
-            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-            rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, -1, 0)
-            wait(0.2)
-            rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, 1, 0)
-            canJumpSpin = true
-        end
-    end
+	-- Автовозврат через 2 сек
+	task.delay(2, function()
+		if savedCFrame then
+			rootPart.CFrame = savedCFrame
+		end
+	end)
 end)
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.M then
-        toggleCheat()
-    end
-end)
+-- Menu animation logic
+local isOpen = true
 
-local function showIntro()
-    local tweenInfoIn = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tweenTextIn = TweenService:Create(introText, tweenInfoIn, {TextTransparency = 0})
-    local tweenImageIn = TweenService:Create(introImage, tweenInfoIn, {ImageTransparency = 0})
-    local tweenFrameIn = TweenService:Create(introFrame, tweenInfoIn, {BackgroundTransparency = 0.6})
-
-    introFrame.BackgroundTransparency = 1
-    introImage.ImageTransparency = 1
-    introText.TextTransparency = 1
-
-    tweenFrameIn:Play()
-    tweenImageIn:Play()
-    tweenTextIn:Play()
-
-    tweenTextIn.Completed:Connect(function()
-        wait(5)
-        local tweenInfoOut = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local tweenTextOut = TweenService:Create(introText, tweenInfoOut, {TextTransparency = 1})
-        local tweenImageOut = TweenService:Create(introImage, tweenInfoOut, {ImageTransparency = 1})
-        local tweenFrameOut = TweenService:Create(introFrame, tweenInfoOut, {BackgroundTransparency = 1})
-
-        tweenTextOut:Play()
-        tweenImageOut:Play()
-        tweenFrameOut:Play()
-
-        tweenFrameOut.Completed:Connect(function()
-            introFrame:Destroy()
-            introImage:Destroy()
-            introText:Destroy()
-            print("Intro finished. Press M or use button to toggle cheat.")
-        end)
-    end)
+local function openMenu()
+	mainFrame.Visible = true
+	local tween = TweenService:Create(mainFrame, TweenInfo.new(0.4), {
+		Position = UDim2.new(1, -10, 0.3, 0),
+		BackgroundTransparency = 0
+	})
+	tween:Play()
+	for _, child in ipairs(mainFrame:GetChildren()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			child.TextTransparency = 0
+			child.BackgroundTransparency = (child:IsA("TextButton") and 0 or 1)
+		end
+	end
+	toggleButton.Text = "<"
+	isOpen = true
 end
 
-updateButton()
-showIntro()
+local function closeMenu()
+	local tween = TweenService:Create(mainFrame, TweenInfo.new(0.4), {
+		Position = UDim2.new(1, 220, 0.3, 0),
+		BackgroundTransparency = 1
+	})
+	tween:Play()
+	for _, child in ipairs(mainFrame:GetChildren()) do
+		if child:IsA("TextLabel") or child:IsA("TextButton") then
+			child.TextTransparency = 1
+			child.BackgroundTransparency = 1
+		end
+	end
+	tween.Completed:Connect(function()
+		mainFrame.Visible = false
+	end)
+	toggleButton.Text = ">"
+	isOpen = false
+end
+
+toggleButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
+	if isOpen then
+		closeMenu()
+	else
+		openMenu()
+	end
+end)
+
+wait(0.5)
+openMenu()
