@@ -5,7 +5,7 @@ local PlayerGui = player:WaitForChild("PlayerGui")
 
 -- Звук успеха
 local successSound = Instance.new("Sound")
-successSound.SoundId = "rbxassetid://1837635150" -- можно поменять на свой звук
+successSound.SoundId = "rbxassetid://452267918" -- можно поменять на свой звук
 successSound.Volume = 0.7
 successSound.Parent = PlayerGui
 
