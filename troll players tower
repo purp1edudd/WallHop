@@ -1,0 +1,240 @@
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- Звук успеха
+local successSound = Instance.new("Sound")
+successSound.SoundId = "rbxassetid://1837635150" -- можно поменять на свой звук
+successSound.Volume = 0.7
+successSound.Parent = PlayerGui
+
+-- Создаём ScreenGui
+local screenGui = Instance.new("ScreenGui", PlayerGui)
+screenGui.Name = "StatusTextGUI"
+screenGui.ResetOnSpawn = false
+
+-- Фон для текста
+local introImage = Instance.new("ImageLabel", screenGui)
+introImage.Size = UDim2.new(0, 400, 0, 90)
+introImage.Position = UDim2.new(0.5, -200, 0.1, 0)
+introImage.BackgroundTransparency = 0.5
+introImage.Image = "rbxassetid://109304194318008"
+introImage.ZIndex = 10
+introImage.ClipsDescendants = true
+
+local bgCorner = Instance.new("UICorner", introImage)
+bgCorner.CornerRadius = UDim.new(0, 20)
+
+local bgStroke = Instance.new("UIStroke", introImage)
+bgStroke.Color = Color3.new(0, 0, 0)
+bgStroke.Thickness = 3
+bgStroke.Transparency = 0.5
+
+-- Текст статуса
+local statusText = Instance.new("TextLabel", introImage)
+statusText.Size = UDim2.new(1, 0, 1, 0)
+statusText.Position = UDim2.new(0, 0, 0, 0)
+statusText.BackgroundTransparency = 1
+statusText.Text = ""
+statusText.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusText.TextTransparency = 1
+statusText.TextScaled = true
+statusText.Font = Enum.Font.GothamBold
+statusText.TextWrapped = true
+statusText.ZIndex = 20
+
+local stroke = Instance.new("UIStroke", statusText)
+stroke.Color = Color3.new(0, 0, 0)
+stroke.Thickness = 1.5
+stroke.Transparency = 1 -- изначально скрыт
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+
+-- Анимация показа/скрытия текста
+local function updateText(newText, color, noBlink)
+	statusText.Text = newText
+	statusText.TextColor3 = color or Color3.new(1,1,1)
+
+	local showText = TweenService:Create(statusText, TweenInfo.new(0.3), {TextTransparency = 0})
+	local showStroke = TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 0})
+	showText:Play()
+	showStroke:Play()
+	showText.Completed:Wait()
+
+	if noBlink then
+		task.delay(2, function()
+			local hideText = TweenService:Create(statusText, TweenInfo.new(0.3), {TextTransparency = 1})
+			local hideStroke = TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 1})
+			hideText:Play()
+			hideStroke:Play()
+		end)
+	else
+		task.wait(1.2)
+		local hideText = TweenService:Create(statusText, TweenInfo.new(0.3), {TextTransparency = 1})
+		local hideStroke = TweenService:Create(stroke, TweenInfo.new(0.3), {Transparency = 1})
+		hideText:Play()
+		hideStroke:Play()
+	end
+end
+
+-- Таймер невидимости трофея
+local trophyInvisibleSince = nil
+local invisibleMaxSeconds = 60
+
+-- Переменная авто-сбора
+local autoCollect = false
+local isCollecting = false
+
+-- Функция плавного перемещения персонажа
+local function moveTo(targetPos, callback)
+	local Character = player.Character or player.CharacterAdded:Wait()
+	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+	local startPos = HumanoidRootPart.Position
+
+	local duration = 0.6
+	local elapsed = 0
+
+	local connection
+	connection = game:GetService("RunService").Heartbeat:Connect(function(dt)
+		elapsed = elapsed + dt
+		local alpha = math.clamp(elapsed / duration, 0, 1)
+		local newPos = startPos:Lerp(targetPos, alpha)
+		HumanoidRootPart.CFrame = CFrame.new(newPos)
+		if alpha >= 1 then
+			connection:Disconnect()
+			if callback then callback() end
+		end
+	end)
+end
+
+-- Функция сбора трофея
+local function collectTrophy()
+	if isCollecting then return end
+	isCollecting = true
+
+	local trophy = workspace:FindFirstChild("Trophy")
+	if not trophy then
+		warn("Trophy not found!")
+		updateText("❌ Trophy not found!", Color3.fromRGB(255, 60, 60))
+		isCollecting = false
+		return
+	end
+
+	local proxHold = trophy:FindFirstChild("ProxHold")
+	if not proxHold or not proxHold:IsA("BasePart") then
+		warn("ProxHold not found or invalid!")
+		updateText("❌ ProxHold missing!", Color3.fromRGB(255, 60, 60))
+		isCollecting = false
+		return
+	end
+
+	local prompt = proxHold:FindFirstChildWhichIsA("ProximityPrompt")
+	if not prompt or not prompt.Enabled then
+		warn("ProximityPrompt not found or disabled!")
+		updateText("❌ Prompt disabled!", Color3.fromRGB(255, 60, 60))
+		isCollecting = false
+		return
+	end
+
+	updateText("🚶 Moving to trophy...", Color3.fromRGB(150, 150, 255))
+	moveTo(proxHold.Position + Vector3.new(0, 2, -3), function()
+		local tries = 3
+		for i = 1, tries do
+			prompt:InputHoldBegin()
+			task.wait(prompt.HoldDuration + 0.3)
+			prompt:InputHoldEnd()
+			task.wait(0.5) -- пауза между попытками
+		end
+		successSound:Play()
+		updateText("✅ Trophy collected!", Color3.fromRGB(0, 255, 0))
+		task.wait(1)
+		isCollecting = false
+	end)
+end
+
+-- Проверка видимости трофея
+local function checkTrophyVisibility()
+	local trophy = workspace:FindFirstChild("Trophy")
+	if trophy and trophy:FindFirstChild("TrophyModel") then
+		local part = trophy.TrophyModel:FindFirstChild("Trophy")
+		if part and part:IsA("BasePart") then
+			if part.Transparency < 1 then
+				trophyInvisibleSince = nil
+				updateText("✅ Trophy visible! 🟢", Color3.fromRGB(0, 255, 0))
+				if autoCollect then
+					collectTrophy()
+				end
+			else
+				if not trophyInvisibleSince then
+					trophyInvisibleSince = tick()
+				end
+				local elapsed = math.floor(tick() - trophyInvisibleSince)
+				if elapsed > invisibleMaxSeconds then
+					updateText("⏳ Trophy still invisible after 1 minute! 🔴", Color3.fromRGB(255, 60, 60))
+				else
+					updateText(("🙈 Trophy invisible! Time: %ds"):format(elapsed), Color3.fromRGB(255, 255, 0), true)
+				end
+			end
+		else
+			updateText("❓ Invalid Trophy part!", Color3.fromRGB(255, 165, 0))
+		end
+	else
+		updateText("❌ Trophy not found! 🔴", Color3.fromRGB(255, 60, 60))
+		trophyInvisibleSince = nil
+	end
+end
+
+-- Создаём основную панель с кнопками
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 280, 0, 120)
+mainFrame.Position = UDim2.new(0.8, 0, 0.8, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.BackgroundTransparency = 0.1
+mainFrame.BorderSizePixel = 0
+
+local uicorner = Instance.new("UICorner", mainFrame)
+uicorner.CornerRadius = UDim.new(0, 15)
+
+-- Кнопка ручного сбора
+local button = Instance.new("TextButton", mainFrame)
+button.Size = UDim2.new(0.8, 0, 0.35, 0)
+button.Position = UDim2.new(0.1, 0, 0.15, 0)
+button.Text = "Get Trophy"
+button.Font = Enum.Font.GothamBold
+button.TextSize = 22
+button.TextColor3 = Color3.new(1,1,1)
+button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+button.AutoButtonColor = true
+
+-- Кнопка авто-сбора
+local autoButton = Instance.new("TextButton", mainFrame)
+autoButton.Size = UDim2.new(0.8, 0, 0.35, 0)
+autoButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+autoButton.Text = "Auto: OFF"
+autoButton.Font = Enum.Font.GothamBold
+autoButton.TextSize = 20
+autoButton.TextColor3 = Color3.new(1,1,1)
+autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+autoButton.AutoButtonColor = true
+
+autoButton.MouseButton1Click:Connect(function()
+	autoCollect = not autoCollect
+	if autoCollect then
+		autoButton.Text = "Auto: ON"
+		autoButton.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+	else
+		autoButton.Text = "Auto: OFF"
+		autoButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+	end
+end)
+
+button.MouseButton1Click:Connect(function()
+	collectTrophy()
+end)
+
+-- Главный цикл проверки
+while true do
+	checkTrophyVisibility()
+	task.wait(2)
+end
