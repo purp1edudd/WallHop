@@ -1,3 +1,11 @@
+if game.PlaceId == 95508886069297 then
+    print("Script loaded for this game")
+    -- твой код здесь
+else
+    game.Players.LocalPlayer:Kick("This script only works in the desired game.")
+end
+
+
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
